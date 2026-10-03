@@ -1,0 +1,378 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #0a0e14;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+  touch-action: none; /* prevent browser gestures (scroll/zoom) while playing */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#c {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#hud {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  color: #cde;
+  font-size: 13px;
+  z-index: 10;
+  background: rgba(0,0,0,.35);
+  padding: 8px 12px;
+  border-radius: 8px;
+  max-width: min(420px, 90vw);
+  pointer-events: none;
+}
+
+#hud button {
+  pointer-events: auto;
+}
+
+#stats {
+  margin-top: 4px;
+  opacity: .8;
+}
+
+#copyLogBtn {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #456;
+  background: #17202b;
+  color: #cde;
+}
+
+#copyLogBtn:active {
+  background: #234;
+}
+
+/* ---------- Mobile controls ---------- */
+#mobile-controls {
+  display: none; /* shown only on touch / coarse pointer */
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none; /* children re-enable */
+}
+
+/* Show on touch devices or when forced */
+@media (pointer: coarse), (hover: none) {
+  #mobile-controls { display: block; }
+  #kb-hint { display: none; }
+}
+
+/* Always show if body has class (useful for testing on desktop) */
+body.show-mobile-ui #mobile-controls { display: block; }
+body.show-mobile-ui #kb-hint { display: none; }
+
+/* Joystick (left side) */
+#joystick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  height: 45%;
+  max-width: 280px;
+  max-height: 280px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#joystick-base {
+  position: absolute;
+  left: 28px;
+  bottom: 28px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.22);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.35);
+}
+
+#joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin-left: -29px;
+  margin-top: -29px;
+  border-radius: 50%;
+  background: rgba(180, 220, 255, 0.55);
+  border: 2px solid rgba(255,255,255,0.55);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: background 0.08s;
+  will-change: transform;
+}
+
+#joystick-knob.active {
+  background: rgba(120, 200, 255, 0.85);
+}
+
+/* Throttle discrete buttons (below / near joystick) */
+#throttle-buttons {
+  position: absolute;
+  left: 180px;
+  bottom: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.throttle-btn {
+  width: 72px;
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.28);
+  background: rgba(30, 80, 50, 0.55);
+  color: #dff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.throttle-btn:active,
+.throttle-btn.pressed {
+  background: rgba(40, 160, 80, 0.85);
+  border-color: rgba(120, 255, 160, 0.7);
+}
+
+/* Action buttons (right side) */
+#action-buttons {
+  position: absolute;
+  right: 16px;
+  bottom: 24px;
+  width: 210px;
+  height: 210px;
+  pointer-events: auto;
+}
+
+.action-btn {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #e8f4ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: rgba(40, 55, 80, 0.65);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+
+.action-btn.primary {
+  background: rgba(30, 90, 160, 0.7);
+}
+
+.action-btn.secondary {
+  background: rgba(50, 45, 70, 0.7);
+  font-size: 11px;
+}
+
+.action-btn.big {
+  width: 84px;
+  height: 84px;
+  font-size: 14px;
+}
+
+.action-btn:active,
+.action-btn.pressed {
+  transform: scale(0.94);
+  filter: brightness(1.25);
+  border-color: rgba(180, 230, 255, 0.8);
+}
+
+/* Layout of action buttons */
+#btn-jump {
+  right: 12px;
+  bottom: 12px;
+  width: 88px;
+  height: 88px;
+  background: rgba(20, 120, 200, 0.75);
+}
+
+#btn-boost {
+  right: 108px;
+  bottom: 20px;
+  width: 72px;
+  height: 72px;
+  background: rgba(200, 140, 20, 0.8);
+}
+
+#btn-powerslide {
+  right: 20px;
+  bottom: 112px;
+  width: 64px;
+  height: 64px;
+}
+
+#btn-airroll-l {
+  right: 148px;
+  bottom: 100px;
+  width: 56px;
+  height: 56px;
+}
+
+#btn-airroll-r {
+  right: 92px;
+  bottom: 118px;
+  width: 56px;
+  height: 56px;
+}
+
+/* Small screens adjustments */
+@media (max-width: 480px) {
+  #joystick-base {
+    width: 120px;
+    height: 120px;
+    left: 16px;
+    bottom: 20px;
+  }
+  #joystick-knob {
+    width: 48px;
+    height: 48px;
+    margin-left: -24px;
+    margin-top: -24px;
+  }
+  #throttle-buttons {
+    left: 145px;
+    bottom: 28px;
+  }
+  .throttle-btn {
+    width: 64px;
+    height: 46px;
+    font-size: 10px;
+  }
+  #action-buttons {
+    width: 180px;
+    height: 180px;
+    right: 8px;
+    bottom: 16px;
+  }
+  #btn-jump {
+    width: 76px;
+    height: 76px;
+  }
+  #btn-boost {
+    width: 64px;
+    height: 64px;
+    right: 92px;
+  }
+}
+
+/* Landscape phones */
+@media (max-height: 420px) and (orientation: landscape) {
+  #joystick-base {
+    width: 110px;
+    height: 110px;
+    left: 20px;
+    bottom: 12px;
+  }
+  #throttle-buttons {
+    left: 150px;
+    bottom: 16px;
+    flex-direction: row;
+  }
+  .throttle-btn {
+    width: 60px;
+    height: 42px;
+  }
+  #action-buttons {
+    height: 160px;
+    width: 190px;
+    bottom: 8px;
+  }
+  #btn-jump {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+/* ---------- Version tag ---------- */
+#version-tag {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: calc(env(safe-area-inset-right, 0px) + 10px);
+  z-index: 30;
+  color: #fff;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---------- Loading screen (real byte-accurate progress) ---------- */
+#loading {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e14;
+  color: #9fb3c8;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0.35s;
+}
+#loading.done {
+  opacity: 0;
+  visibility: hidden;
+}
+.loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(320px, 82vw);
+}
+.loading-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #e8f0f8;
+  text-transform: uppercase;
+}
+.loading-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+}
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1a8cff, #4ecbff);
+  border-radius: 4px;
+  transition: width 0.12s linear;
+}
+.loading-pct {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #cde;
+  min-height: 1.2em;
+}
+.loading-status {
+  font-size: 13px;
+  opacity: 0.75;
+  text-align: center;
+  min-height: 1.2em;
+}

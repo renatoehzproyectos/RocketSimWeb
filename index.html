@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta name="build-id" content="dev" />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="preload" href="assets/fennec.glb" as="fetch" crossorigin />
+<title>RocketSim Web Demo</title>
+<link rel="stylesheet" href="style.css?v=5" />
+<link rel="stylesheet" href="customui.css?v=1" />
+</head>
+<body>
+  <div id="loading" aria-live="polite">
+    <div class="loading-inner">
+      <div class="loading-title">RocketSim</div>
+      <div class="loading-bar-wrap">
+        <div id="loading-bar" class="loading-bar"></div>
+      </div>
+      <div id="loading-pct" class="loading-pct">0%</div>
+      <div id="loading-status" class="loading-status">Iniciando…</div>
+    </div>
+  </div>
+  <div id="hud">
+    <div id="kb-hint">WASD: acelerar/girar · Q/E: air-roll · Espacio: salto · Shift: boost · Ctrl: powerslide · C: cámara · R: reset balón · Mando PS4 soportado · Esc/Options: ajustes</div>
+    <div id="pad-status"></div>
+    <div id="stats"></div>
+    <button id="copyLogBtn">Copiar log de hipos</button>
+  </div>
+
+  <div id="mobile-controls">
+    <div id="joystick-zone">
+      <div id="joystick-base">
+        <div id="joystick-knob"></div>
+      </div>
+    </div>
+    <div id="action-buttons">
+      <button id="btn-airroll-l" class="action-btn secondary" data-action="airroll-l">AR L</button>
+      <button id="btn-airroll-r" class="action-btn secondary" data-action="airroll-r">AR R</button>
+      <button id="btn-powerslide" class="action-btn secondary" data-action="powerslide">SLIDE</button>
+      <button id="btn-boost" class="action-btn primary" data-action="boost">BOOST</button>
+      <button id="btn-jump" class="action-btn primary big" data-action="jump">JUMP</button>
+    </div>
+    <div id="throttle-buttons">
+      <button id="btn-accel" class="throttle-btn" data-action="accel">▲ ACCEL</button>
+      <button id="btn-decel" class="throttle-btn" data-action="decel">▼ BRAKE</button>
+    </div>
+  </div>
+
+  <div id="version-tag">v1.0 build dev</div>
+
+  <div id="start-menu" role="dialog" aria-label="Menú de inicio">
+    <button id="play-button" type="button"><span>JUGAR</span></button>
+  </div>
+
+  <canvas id="c"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script type="module" src="game.js?v=18"></script>
+  <script>
+  document.getElementById('play-button').addEventListener('click', function () {
+    document.getElementById('start-menu').remove();
+  });
+
+  // Auto-actualiza: si GitHub Actions publica un build nuevo, recarga la página.
+  (function () {
+    var cur = document.querySelector('meta[name="build-id"]').content;
+    if (cur === 'dev') return;
+    setInterval(function () {
+      fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j.build && j.build !== cur) location.reload(); })
+        .catch(function () {});
+    }, 20000);
+  })();
+  </script>
+</body>
+</html>

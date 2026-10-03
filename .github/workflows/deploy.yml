@@ -1,0 +1,60 @@
+name: Deploy RocketSim Web
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare site (anti-cache + version tag)
+        run: |
+          set -e
+          mkdir -p _site/dist
+          cp index.html style.css customui.css game.js gamepad.js _site/
+          cp dist/rocketsim.js _site/dist/
+          cp -r assets _site/
+          # El .wasm cambia de nombre en cada build -> el navegador nunca usa uno viejo
+          cp dist/rocketsim.wasm "_site/dist/rocketsim.${BUILD_ID}.wasm"
+          sed -i "s/rocketsim\.wasm/rocketsim.${BUILD_ID}.wasm/g" _site/dist/rocketsim.js
+          sed -i "s#\./dist/rocketsim\.js#./dist/rocketsim.js?v=${BUILD_ID}#" _site/game.js
+          sed -i "s/?v=[0-9]*\"/?v=${BUILD_ID}\"/g" _site/index.html
+          sed -i "s/content=\"dev\"/content=\"${BUILD_ID}\"/; s/build dev/build ${BUILD_ID}/" _site/index.html
+          echo "{\"build\":\"${BUILD_ID}\"}" > _site/version.json
+          touch _site/.nojekyll
+          # Verificación: falla el job si algún reemplazo no se aplicó
+          grep -q "rocketsim.${BUILD_ID}.wasm" _site/dist/rocketsim.js
+          grep -q "rocketsim.js?v=${BUILD_ID}" _site/game.js
+          grep -q "style.css?v=${BUILD_ID}" _site/index.html
+          grep -q "game.js?v=${BUILD_ID}" _site/index.html
+          grep -q "customui.css?v=${BUILD_ID}" _site/index.html
+          grep -q "v1.0 build ${BUILD_ID}" _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
